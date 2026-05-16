@@ -59,13 +59,17 @@ export default function Dashboard() {
     ? sortedCats.map(([, v]) => v)
     : [3519,2800,1500,900,700,500,400,350,300,200];
 
-  const income   = totalIncome  || 45000;
-  const expense  = totalExpense || 27450;
-  const savings  = Math.max(balance, 0) || 17550;
-  const savingsPct = income > 0 ? Math.round((savings / income) * 100) : 39;
+  const income  = totalIncome  || 0;
+  const expense = totalExpense || 0;
+  const savings = Math.max(balance, 0);
 
-  const topCat = sortedCats.length ? sortedCats[0][0] : "House Rent";
-  const topAmt = sortedCats.length ? sortedCats[0][1] : 1150;
+  // ✅ FIX: savings % لا يتجاوز 100 ولا يكون سالب
+  const savingsPct = income > 0
+    ? Math.min(100, Math.max(0, Math.round((savings / income) * 100)))
+    : 0;
+
+  const topCat = sortedCats.length ? sortedCats[0][0] : "—";
+  const topAmt = sortedCats.length ? sortedCats[0][1] : 0;
 
   const today = new Date();
   const lineLabels = Array.from({ length: 7 }, (_, i) => {
@@ -129,13 +133,20 @@ export default function Dashboard() {
   useEffect(() => {
     if (!donutRef.current) return;
     donutChart.current?.destroy();
+
+    // ✅ FIX: لو مفيش data خالص، بيعرض placeholder رمادي
+    const hasData = income > 0 || expense > 0;
     donutChart.current = new Chart(donutRef.current, {
       type: "doughnut",
       data: {
         labels: ["Income", "Expense", "Savings"],
         datasets: [{
-          data: [income, expense, savings],
-          backgroundColor: ["#22c55e", "#1a1a2e", "#e2e8f0"],
+          data: hasData
+            ? [income, expense, savings > 0 ? savings : 0]
+            : [1, 0, 0],
+          backgroundColor: hasData
+            ? ["#22c55e", "#1a1a2e", "#e2e8f0"]
+            : ["#e2e8f0", "#e2e8f0", "#e2e8f0"],
           borderWidth: 0,
           hoverOffset: 4,
         }],
@@ -146,7 +157,10 @@ export default function Dashboard() {
         cutout: "72%",
         plugins: {
           legend: { display: false },
-          tooltip: { callbacks: { label: (c) => ` $${fmt(c.raw)}` } },
+          tooltip: {
+            enabled: hasData,
+            callbacks: { label: (c) => ` $${fmt(c.raw)}` },
+          },
         },
       },
     });
@@ -233,7 +247,9 @@ export default function Dashboard() {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="16 12 12 8 8 12"/><line x1="12" y1="16" x2="12" y2="8"/></svg>
           </div>
           <div className="dash-card__val">${fmt(savings)}</div>
-          <div className="dash-card__trend up">↑ 1% vs last 30 days</div>
+          <div className={`dash-card__trend ${savings >= 0 ? "up" : "down"}`}>
+            {savings >= 0 ? "↑" : "↓"} 1% vs last 30 days
+          </div>
         </div>
 
         <div className="dash-card">
