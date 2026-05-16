@@ -12,14 +12,22 @@
 }
 
 .main-content {
-  margin-left: 240px;
-  padding: 32px 40px;
   flex: 1;
   min-height: 100vh;
   background-color: #f9fafb;
+  /* desktop: push content past the sidebar */
+  margin-left: 200px;
 }
 
-.page h1 {
-  color: #111827;
-  font-size: 24px;
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 0;
+    width: 100%;
+  }
 }
