@@ -5,14 +5,23 @@
   width: 200px;
   min-width: 200px;
   height: 100vh;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
   background: #fff;
   border-right: 1px solid #f0f2f5;
   display: flex;
   flex-direction: column;
   padding: 24px 0 20px;
   font-family: "Inter", sans-serif;
+}
+
+/* ── RTL: sidebar on the right ── */
+[dir="rtl"] .sidebar {
+  left: auto;
+  right: 0;
+  border-right: none;
+  border-left: 1px solid #f0f2f5;
 }
 
 .sidebar-logo {
@@ -42,6 +51,7 @@
   flex-direction: column;
   gap: 2px;
   padding: 0 10px;
+  flex: 1;
 }
 
 .sidebar-link {
@@ -66,6 +76,44 @@
   font-weight: 600;
 }
 
+/* ── Footer (language toggle) ── */
+.sidebar-footer {
+  padding: 12px 14px 4px;
+  border-top: 1px solid #f0f2f5;
+  margin-top: 8px;
+}
+
+.sidebar-lang-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  font-family: "Inter", sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.sidebar-lang-btn:hover {
+  border-color: #22c55e;
+  color: #16a34a;
+  background: #f0fdf4;
+}
+.sidebar-lang-btn--mobile {
+  border: none;
+  background: transparent;
+  padding: 11px 14px;
+  font-size: 14px;
+}
+.sidebar-lang-btn--mobile:hover {
+  background: #f9fafb;
+}
+
 /* ══════════════════════════════════════
    MOBILE — hidden on desktop
 ══════════════════════════════════════ */
@@ -76,6 +124,12 @@
   display: none;
 }
 .mobile-menu {
+  display: none;
+}
+.mobile-menu-divider {
+  display: none;
+}
+.mobile-menu-lang {
   display: none;
 }
 
@@ -149,8 +203,13 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
     z-index: 200;
     padding: 8px;
-    min-width: 180px;
+    min-width: 200px;
     animation: menuIn 0.15s ease;
+  }
+
+  [dir="rtl"] .mobile-menu {
+    right: auto;
+    left: 12px;
   }
 
   @keyframes menuIn {
@@ -177,5 +236,15 @@
     background: #f0fdf4;
     color: #16a34a;
     font-weight: 600;
+  }
+
+  .mobile-menu-divider {
+    display: block;
+    height: 1px;
+    background: #f0f2f5;
+    margin: 6px 4px;
+  }
+  .mobile-menu-lang {
+    display: block;
   }
 }

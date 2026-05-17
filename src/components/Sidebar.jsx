@@ -1,14 +1,18 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
+import { useLang } from "../contexts/LanguageContext";
 import "./Sidebar.css";
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
+  const { t, lang, setLang } = useLang();
+
+  const toggleLang = () => setLang(lang === "en" ? "ar" : "en");
 
   const links = [
     {
       to: "/",
-      label: "Dashboard",
+      label: t("nav.dashboard"),
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
@@ -18,7 +22,7 @@ export default function Sidebar() {
     },
     {
       to: "/transactions",
-      label: "Transactions",
+      label: t("nav.transactions"),
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
@@ -29,7 +33,7 @@ export default function Sidebar() {
     },
     {
       to: "/add",
-      label: "Add New",
+      label: t("nav.add"),
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="10"/>
@@ -38,7 +42,33 @@ export default function Sidebar() {
         </svg>
       ),
     },
+    {
+      to: "/budget",
+      label: t("nav.budget"),
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M12 2v20"/>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      ),
+    },
   ];
+
+  const langButton = (
+    <button
+      type="button"
+      onClick={toggleLang}
+      className="sidebar-lang-btn"
+      aria-label="Toggle language"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="2" y1="12" x2="22" y2="12"/>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+      {t("nav.langToggle")}
+    </button>
+  );
 
   return (
     <>
@@ -69,6 +99,8 @@ export default function Sidebar() {
             </NavLink>
           ))}
         </nav>
+
+        <div className="sidebar-footer">{langButton}</div>
       </aside>
 
       {/* ── Mobile Top Bar ── */}
@@ -89,13 +121,11 @@ export default function Sidebar() {
           aria-label="Toggle menu"
         >
           {open ? (
-            /* X icon */
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <line x1="18" y1="6" x2="6" y2="18"/>
               <line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           ) : (
-            /* Hamburger icon */
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <line x1="3" y1="6" x2="21" y2="6"/>
               <line x1="3" y1="12" x2="21" y2="12"/>
@@ -127,6 +157,22 @@ export default function Sidebar() {
                 {l.label}
               </NavLink>
             ))}
+            <div className="mobile-menu-divider" />
+            <div className="mobile-menu-lang">
+              <button
+                type="button"
+                onClick={() => { toggleLang(); setOpen(false); }}
+                className="sidebar-lang-btn sidebar-lang-btn--mobile"
+                aria-label="Toggle language"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="2" y1="12" x2="22" y2="12"/>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+                {t("nav.langToggle")}
+              </button>
+            </div>
           </nav>
         </>
       )}

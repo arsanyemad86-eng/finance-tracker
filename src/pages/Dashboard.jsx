@@ -9,7 +9,10 @@ import {
   Tooltip, Legend,
 } from "chart.js";
 import { useTransactions } from "../hooks/useTransactions";
+import { useBudgets, getExceededCategories } from "../hooks/useBudgets";
+import { useLang } from "../contexts/LanguageContext";
 import "./Dashboard.css";
+import "./Budget.css";
 
 Chart.register(
   BarController, BarElement,
@@ -28,6 +31,8 @@ const fmt = (n) => Math.round(n).toLocaleString("en-US");
 
 export default function Dashboard() {
   const { transactions, totalIncome, totalExpense, balance } = useTransactions();
+  const { budgets } = useBudgets();
+  const { t, lang } = useLang();
 
   const barRef     = useRef(null);
   const donutRef   = useRef(null);
@@ -63,7 +68,6 @@ export default function Dashboard() {
   const expense = totalExpense || 0;
   const savings = Math.max(balance, 0);
 
-  // ✅ FIX: savings % لا يتجاوز 100 ولا يكون سالب
   const savingsPct = income > 0
     ? Math.min(100, Math.max(0, Math.round((savings / income) * 100)))
     : 0;
@@ -71,11 +75,15 @@ export default function Dashboard() {
   const topCat = sortedCats.length ? sortedCats[0][0] : "—";
   const topAmt = sortedCats.length ? sortedCats[0][1] : 0;
 
+  const exceeded = getExceededCategories(budgets, transactions);
+
+  const localeForDates = lang === "ar" ? "ar-EG" : "en-US";
+
   const today = new Date();
   const lineLabels = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(today);
     d.setDate(d.getDate() - (6 - i));
-    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return d.toLocaleDateString(localeForDates, { month: "short", day: "numeric" });
   });
   const lineData = lineLabels.map((_, i) => {
     const d = new Date(today);
@@ -134,12 +142,11 @@ export default function Dashboard() {
     if (!donutRef.current) return;
     donutChart.current?.destroy();
 
-    // ✅ FIX: لو مفيش data خالص، بيعرض placeholder رمادي
     const hasData = income > 0 || expense > 0;
     donutChart.current = new Chart(donutRef.current, {
       type: "doughnut",
       data: {
-        labels: ["Income", "Expense", "Savings"],
+        labels: [t("dash.income"), t("dash.expense"), t("dash.savings")],
         datasets: [{
           data: hasData
             ? [income, expense, savings > 0 ? savings : 0]
@@ -165,7 +172,7 @@ export default function Dashboard() {
       },
     });
     return () => donutChart.current?.destroy();
-  }, [transactions]);
+  }, [transactions, lang]);
 
   useEffect(() => {
     if (!lineRef.current) return;
@@ -204,57 +211,57 @@ export default function Dashboard() {
       },
     });
     return () => lineChart.current?.destroy();
-  }, [transactions]);
+  }, [transactions, lang]);
 
   return (
     <div className="dash">
       <div className="dash-topbar">
-        <h1 className="dash-heading">Dashboard</h1>
-        <span className="dash-period">Last 3 months</span>
+        <h1 className="dash-heading">{t("dash.title")}</h1>
+        <span className="dash-period">{t("dash.period")}</span>
       </div>
 
       <div className="dash-cards">
         <div className="dash-card">
           <div className="dash-card__header">
-            <span className="dash-card__label">Total Income</span>
+            <span className="dash-card__label">{t("dash.totalIncome")}</span>
             <button className="dash-card__dots" aria-label="More">···</button>
           </div>
           <div className="dash-card__icon dash-card__icon--income">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           </div>
           <div className="dash-card__val">${fmt(income)}</div>
-          <div className="dash-card__trend up">↑ 6% vs last 30 days</div>
+          <div className="dash-card__trend up">↑ 6% {t("dash.vsLast30")}</div>
         </div>
 
         <div className="dash-card dash-card--accent">
           <div className="dash-card__header">
-            <span className="dash-card__label">Total Expense</span>
+            <span className="dash-card__label">{t("dash.totalExpense")}</span>
             <button className="dash-card__dots" aria-label="More">···</button>
           </div>
           <div className="dash-card__icon dash-card__icon--expense">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
           </div>
           <div className="dash-card__val">${fmt(expense)}</div>
-          <div className="dash-card__trend down">↓ 2% vs last 30 days</div>
+          <div className="dash-card__trend down">↓ 2% {t("dash.vsLast30")}</div>
         </div>
 
         <div className="dash-card">
           <div className="dash-card__header">
-            <span className="dash-card__label">Total Savings</span>
-            <Link to="/transactions" className="dash-card__viewbtn">View Details</Link>
+            <span className="dash-card__label">{t("dash.totalSavings")}</span>
+            <Link to="/transactions" className="dash-card__viewbtn">{t("dash.viewDetails")}</Link>
           </div>
           <div className="dash-card__icon dash-card__icon--savings">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="16 12 12 8 8 12"/><line x1="12" y1="16" x2="12" y2="8"/></svg>
           </div>
           <div className="dash-card__val">${fmt(savings)}</div>
           <div className={`dash-card__trend ${savings >= 0 ? "up" : "down"}`}>
-            {savings >= 0 ? "↑" : "↓"} 1% vs last 30 days
+            {savings >= 0 ? "↑" : "↓"} 1% {t("dash.vsLast30")}
           </div>
         </div>
 
         <div className="dash-card">
           <div className="dash-card__header">
-            <span className="dash-card__label">Most Spending</span>
+            <span className="dash-card__label">{t("dash.mostSpending")}</span>
             <button className="dash-card__dots" aria-label="More">···</button>
           </div>
           <div className="dash-card__icon dash-card__icon--spending">
@@ -268,7 +275,7 @@ export default function Dashboard() {
       <div className="dash-charts">
         <div className="dash-panel">
           <div className="dash-panel__head">
-            <span className="dash-panel__title">Top 5 Expense Source</span>
+            <span className="dash-panel__title">{t("dash.topExpenseSource")}</span>
             <button className="dash-card__dots" aria-label="More">···</button>
           </div>
           <div className="dash-bar-wrap">
@@ -278,35 +285,35 @@ export default function Dashboard() {
 
         <div className="dash-panel dash-panel--report">
           <div className="dash-panel__head">
-            <span className="dash-panel__title">Report Overview</span>
+            <span className="dash-panel__title">{t("dash.reportOverview")}</span>
             <button className="dash-card__dots" aria-label="More">···</button>
           </div>
           <div className="dash-donut-wrap">
             <canvas ref={donutRef} />
             <div className="dash-donut-center">
               <span className="dash-donut-pct">{savingsPct}%</span>
-              <span className="dash-donut-sub">savings</span>
+              <span className="dash-donut-sub">{t("dash.savings")}</span>
             </div>
           </div>
           <div className="dash-legend">
             <div className="dash-legend__row">
               <span className="dash-legend__dot" style={{ background: "#22c55e" }} />
               <div>
-                <div className="dash-legend__name">Income</div>
+                <div className="dash-legend__name">{t("dash.income")}</div>
                 <div className="dash-legend__val">${fmt(income)} <span className="up">↑</span></div>
               </div>
             </div>
             <div className="dash-legend__row">
               <span className="dash-legend__dot" style={{ background: "#1a1a2e" }} />
               <div>
-                <div className="dash-legend__name">Expense</div>
+                <div className="dash-legend__name">{t("dash.expense")}</div>
                 <div className="dash-legend__val">${fmt(expense)} <span className="down">↓</span></div>
               </div>
             </div>
             <div className="dash-legend__row">
               <span className="dash-legend__dot" style={{ background: "#e2e8f0" }} />
               <div>
-                <div className="dash-legend__name">Savings</div>
+                <div className="dash-legend__name">{t("dash.savings")}</div>
                 <div className="dash-legend__val">${fmt(savings)} <span className="up">↑</span></div>
               </div>
             </div>
@@ -314,32 +321,51 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* ── Budget Alerts ── */}
+      <div className="dash-budget-alerts">
+        <div className="dash-budget-alerts__title">{t("dash.budgetAlerts")}</div>
+        {exceeded.length === 0 ? (
+          <div className="dash-budget-alerts__empty">{t("dash.noBudgetAlerts")}</div>
+        ) : (
+          <ul className="dash-budget-alerts__list">
+            {exceeded.map((e) => (
+              <li key={e.category} className="dash-budget-alerts__item">
+                <span className="dash-budget-alerts__cat">{e.category}</span>
+                <span className="dash-budget-alerts__amt">
+                  {t("dash.exceededBy")} ${fmt(e.over)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
       <div className="dash-bottom">
         <div className="dash-panel">
           <div className="dash-panel__head">
-            <span className="dash-panel__title">Recent Expenses</span>
-            <Link to="/transactions" className="dash-panel__link">See all →</Link>
+            <span className="dash-panel__title">{t("dash.recentExpenses")}</span>
+            <Link to="/transactions" className="dash-panel__link">{t("dash.seeAll")}</Link>
           </div>
           {recent.length === 0 ? (
             <div className="dash-empty">
-              No transactions yet.{" "}
-              <Link to="/add" className="dash-empty__link">Add one</Link>
+              {t("dash.noTxnYet")}{" "}
+              <Link to="/add" className="dash-empty__link">{t("dash.addOne")}</Link>
             </div>
           ) : (
             <ul className="dash-txn-list">
-              {recent.map((t) => (
-                <li key={t.id} className="dash-txn">
-                  <span className={`dash-txn__dot dash-txn__dot--${t.type}`} />
+              {recent.map((tx) => (
+                <li key={tx.id} className="dash-txn">
+                  <span className={`dash-txn__dot dash-txn__dot--${tx.type}`} />
                   <div className="dash-txn__info">
-                    <div className="dash-txn__cat">{t.category}</div>
+                    <div className="dash-txn__cat">{tx.category}</div>
                     <div className="dash-txn__date">
-                      {new Date(t.date).toLocaleDateString("en-US", {
+                      {new Date(tx.date).toLocaleDateString(localeForDates, {
                         day: "numeric", month: "long", year: "numeric",
                       })}
                     </div>
                   </div>
-                  <span className={`dash-txn__amt dash-txn__amt--${t.type}`}>
-                    {t.type === "income" ? "+" : "-"}${fmt(t.amount)}
+                  <span className={`dash-txn__amt dash-txn__amt--${tx.type}`}>
+                    {tx.type === "income" ? "+" : "-"}${fmt(tx.amount)}
                   </span>
                 </li>
               ))}
@@ -349,10 +375,10 @@ export default function Dashboard() {
 
         <div className="dash-panel">
           <div className="dash-panel__head">
-            <span className="dash-panel__title">Expense Activity</span>
+            <span className="dash-panel__title">{t("dash.expenseActivity")}</span>
             <span className="dash-activity-legend">
               <span className="dash-activity-line" />
-              Actual expense
+              {t("dash.actualExpense")}
             </span>
           </div>
           <div className="dash-line-wrap">

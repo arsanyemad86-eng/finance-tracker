@@ -19,6 +19,17 @@
   margin-left: 200px;
 }
 
+/* ── RTL: sidebar flips to the right ── */
+[dir="rtl"] .main-content {
+  margin-left: 0;
+  margin-right: 200px;
+}
+
+/* RTL text alignment baseline */
+[dir="rtl"] {
+  text-align: right;
+}
+
 /* ── Mobile ── */
 @media (max-width: 768px) {
   .app-layout {
@@ -29,5 +40,9 @@
     margin-left: 0;
     padding: 0;
     width: 100%;
+  }
+
+  [dir="rtl"] .main-content {
+    margin-right: 0;
   }
 }

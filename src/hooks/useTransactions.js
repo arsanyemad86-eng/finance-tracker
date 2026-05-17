@@ -24,6 +24,13 @@ export function useTransactions() {
     setTransactions(prev => prev.filter(t => t.id !== id))
   }
 
+  // ✏️ Edit: استبدل الـ transaction القديمة بالبيانات الجديدة
+  const editTransaction = (id, updatedData) => {
+    setTransactions(prev =>
+      prev.map(t => (t.id === id ? { ...t, ...updatedData } : t))
+    )
+  }
+
   const totalIncome = transactions
     .filter(t => t.type === 'income')
     .reduce((sum, t) => sum + t.amount, 0)
@@ -38,6 +45,7 @@ export function useTransactions() {
     transactions,
     addTransaction,
     deleteTransaction,
+    editTransaction,
     totalIncome,
     totalExpense,
     balance,
