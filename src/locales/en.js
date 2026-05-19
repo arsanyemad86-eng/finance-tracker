@@ -59,6 +59,9 @@ export default {
   "txn.cancel": "Cancel",
   "txn.invalidAmount": "Please enter a valid amount.",
   "txn.invalidDate": "Please select a date.",
+  "txn.from": "From",
+  "txn.to": "To",
+  "txn.clear": "Clear",
 
   // Add Transaction
   "add.title": "Add Transaction",

@@ -28,6 +28,13 @@ export default function Transactions() {
 
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo,   setDateTo]   = useState("");
+
+  const clearDateRange = () => {
+    setDateFrom("");
+    setDateTo("");
+  };
 
   // ── Edit modal state ──
   const [editingTxn, setEditingTxn]   = useState(null);
@@ -190,9 +197,17 @@ export default function Transactions() {
       ? transactions
       : transactions.filter((t) => t.type === filter);
 
+  // Apply date range filter (inclusive on both ends)
+  const byDateRange = byType.filter((t) => {
+    if (!t.date) return true;
+    if (dateFrom && t.date < dateFrom) return false;
+    if (dateTo   && t.date > dateTo)   return false;
+    return true;
+  });
+
   const q = search.trim().toLowerCase();
   const filtered = q
-    ? byType.filter((t) => {
+    ? byDateRange.filter((t) => {
         return (
           (t.category || "").toLowerCase().includes(q) ||
           (t.note || "").toLowerCase().includes(q) ||
@@ -200,7 +215,7 @@ export default function Transactions() {
           String(t.amount).includes(q)
         );
       })
-    : byType;
+    : byDateRange;
 
   const sorted = [...filtered].sort(
     (a, b) => new Date(b.date) - new Date(a.date)
@@ -372,6 +387,41 @@ export default function Transactions() {
         />
       </div>
 
+      {/* ── Date Range Filter ── */}
+      <div className="txn-date-range">
+        <div className="txn-date-field">
+          <label htmlFor="txn-date-from" className="txn-date-label">{t("txn.from")}</label>
+          <input
+            id="txn-date-from"
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            max={dateTo || undefined}
+            className="txn-date-input"
+          />
+        </div>
+        <div className="txn-date-field">
+          <label htmlFor="txn-date-to" className="txn-date-label">{t("txn.to")}</label>
+          <input
+            id="txn-date-to"
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            min={dateFrom || undefined}
+            className="txn-date-input"
+          />
+        </div>
+        {(dateFrom || dateTo) && (
+          <button
+            type="button"
+            className="txn-date-clear"
+            onClick={clearDateRange}
+          >
+            {t("txn.clear")}
+          </button>
+        )}
+      </div>
+
       {/* ── Filter Tabs ── */}
       <div className="txn-filters">
         {["all", "income", "expense"].map((f) => (
@@ -389,7 +439,7 @@ export default function Transactions() {
       <div className="txn-table-wrap">
         {sorted.length === 0 ? (
           <div className="txn-empty">
-            {q
+            {(q || dateFrom || dateTo)
               ? t("txn.noMatch")
               : (
                 <>

@@ -118,6 +118,71 @@
   box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.08);
 }
 
+/* ── Date range filter ── */
+.txn-date-range {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.txn-date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.txn-date-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.txn-date-input {
+  border: 1px solid #f0f2f5;
+  border-radius: 9px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: "Inter", sans-serif;
+  color: #111827;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+  min-width: 160px;
+}
+.txn-date-input:focus {
+  border-color: #86efac;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.08);
+}
+
+.txn-date-clear {
+  background: #fff;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: "Inter", sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+  height: 36px;
+  align-self: flex-end;
+}
+.txn-date-clear:hover {
+  background: #f9fafb;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+@media (max-width: 640px) {
+  .txn-date-range { gap: 8px; }
+  .txn-date-input { min-width: 0; flex: 1; }
+  .txn-date-field { flex: 1; min-width: 140px; }
+}
+
 /* ── Filter tabs ── */
 .txn-filters {
   display: flex;

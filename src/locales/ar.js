@@ -59,6 +59,9 @@ export default {
   "txn.cancel": "إلغاء",
   "txn.invalidAmount": "من فضلك أدخل مبلغ صحيح.",
   "txn.invalidDate": "من فضلك اختر تاريخ.",
+  "txn.from": "من",
+  "txn.to": "إلى",
+  "txn.clear": "مسح",
 
   // Add Transaction
   "add.title": "إضافة معاملة",
