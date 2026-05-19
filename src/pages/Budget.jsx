@@ -16,6 +16,18 @@ const EXPENSE_CATS = [
   "Other",
 ];
 
+const SUGGESTED_LIMITS = {
+  Food: 800,
+  "House Rent": 2000,
+  Transport: 500,
+  Bills: 400,
+  Shopping: 300,
+  Health: 200,
+  Education: 500,
+  Entertainment: 200,
+  Other: 300,
+};
+
 const fmt = (n) =>
   Math.round(n).toLocaleString("en-US");
 
@@ -24,7 +36,6 @@ export default function Budget() {
   const { budgets, setAll } = useBudgets();
   const { t } = useLang();
 
-  // Local form state so the user can edit before saving
   const [draft, setDraft] = useState(() => {
     const init = {};
     EXPENSE_CATS.forEach((c) => {
@@ -34,7 +45,6 @@ export default function Budget() {
   });
   const [savedFlash, setSavedFlash] = useState(false);
 
-  // Sync draft when budgets change externally (e.g. on mount with stored values)
   useEffect(() => {
     const next = {};
     EXPENSE_CATS.forEach((c) => {
@@ -62,6 +72,14 @@ export default function Budget() {
     setTimeout(() => setSavedFlash(false), 1500);
   };
 
+  const handleSuggestedLimits = () => {
+    const next = {};
+    EXPENSE_CATS.forEach((c) => {
+      next[c] = String(SUGGESTED_LIMITS[c] || 300);
+    });
+    setDraft(next);
+  };
+
   return (
     <div className="budget-page">
       <div className="budget-header">
@@ -69,13 +87,22 @@ export default function Budget() {
           <h1 className="budget-title">{t("budget.title")}</h1>
           <p className="budget-sub">{t("budget.subtitle")}</p>
         </div>
-        <button
-          type="submit"
-          form="budget-form"
-          className="budget-save-btn"
-        >
-          {savedFlash ? t("budget.saved") : t("budget.save")}
-        </button>
+        <div className="budget-header__actions">
+          <button
+            type="button"
+            className="budget-suggest-btn"
+            onClick={handleSuggestedLimits}
+          >
+            ✦ Set suggested limits
+          </button>
+          <button
+            type="submit"
+            form="budget-form"
+            className="budget-save-btn"
+          >
+            {savedFlash ? t("budget.saved") : t("budget.save")}
+          </button>
+        </div>
       </div>
 
       <form id="budget-form" onSubmit={handleSave} className="budget-grid">
