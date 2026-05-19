@@ -240,3 +240,26 @@
   .budget-page { padding: 16px; }
   .budget-grid { grid-template-columns: 1fr; }
 }
+.budget-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.budget-suggest-btn {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #86efac;
+  border-radius: 9px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: "Inter", sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.budget-suggest-btn:hover {
+  background: #dcfce7;
+  border-color: #4ade80;
+}
