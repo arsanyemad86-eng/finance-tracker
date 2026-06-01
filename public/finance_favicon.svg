@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <rect width="100" height="100" rx="18" fill="#0f1923"/>
+
+  <!-- Chart bars -->
+  <rect x="14" y="58" width="14" height="24" rx="3" fill="#00c896"/>
+  <rect x="33" y="42" width="14" height="40" rx="3" fill="#00c896"/>
+  <rect x="52" y="28" width="14" height="54" rx="3" fill="#00c896"/>
+  <rect x="71" y="38" width="14" height="44" rx="3" fill="#00e5ff"/>
+
+  <!-- Trend line -->
+  <polyline points="21,56 40,40 59,26 78,36" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Dots on line -->
+  <circle cx="21" cy="56" r="3" fill="#ffffff"/>
+  <circle cx="40" cy="40" r="3" fill="#ffffff"/>
+  <circle cx="59" cy="26" r="3" fill="#ffffff"/>
+  <circle cx="78" cy="36" r="3.5" fill="#00e5ff"/>
+
+  <!-- Dollar sign -->
+  <text x="50" y="95" font-family="Arial" font-size="7" fill="#00c896" text-anchor="middle" opacity="0.6">FINANCE</text>
+</svg>
