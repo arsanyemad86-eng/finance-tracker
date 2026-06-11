@@ -5,31 +5,17 @@ import { useLang } from "../contexts/LanguageContext";
 import "./Budget.css";
 
 const EXPENSE_CATS = [
-  "Food",
-  "House Rent",
-  "Transport",
-  "Bills",
-  "Shopping",
-  "Health",
-  "Education",
-  "Entertainment",
-  "Other",
+  "Food", "House Rent", "Transport", "Bills",
+  "Shopping", "Health", "Education", "Entertainment", "Other",
 ];
 
 const SUGGESTED_LIMITS = {
-  Food: 800,
-  "House Rent": 2000,
-  Transport: 500,
-  Bills: 400,
-  Shopping: 300,
-  Health: 200,
-  Education: 500,
-  Entertainment: 200,
-  Other: 300,
+  Food: 800, "House Rent": 2000, Transport: 500,
+  Bills: 400, Shopping: 300, Health: 200,
+  Education: 500, Entertainment: 200, Other: 300,
 };
 
-const fmt = (n) =>
-  Math.round(n).toLocaleString("en-US");
+const fmt = (n) => Math.round(n).toLocaleString("en-US");
 
 export default function Budget() {
   const { transactions } = useTransactions();
@@ -109,8 +95,8 @@ export default function Budget() {
         {EXPENSE_CATS.map((cat) => {
           const limit = parseFloat(draft[cat]) || 0;
           const spent = spendMap[cat] || 0;
-          const pct = limit > 0 ? Math.min(100, Math.round((spent / limit) * 100)) : 0;
           const realPct = limit > 0 ? (spent / limit) * 100 : 0;
+          const pct = Math.min(100, Math.round(realPct));
 
           let status = "safe";
           if (limit > 0) {
@@ -118,48 +104,64 @@ export default function Budget() {
             else if (realPct >= 80) status = "warning";
           }
 
+          const hasLimit = limit > 0;
+          const remaining = hasLimit ? limit - spent : null;
+
           return (
             <div key={cat} className={`budget-card budget-card--${status}`}>
+              {/* Row 1: Name + Status badge */}
               <div className="budget-card__row">
                 <span className="budget-card__name">{cat}</span>
                 <span className={`budget-card__status budget-card__status--${status}`}>
-                  {limit > 0 ? t(`budget.status.${status}`) : t("budget.noLimit")}
+                  {hasLimit ? t(`budget.status.${status}`) : t("budget.noLimit")}
                 </span>
               </div>
 
+              {/* Row 2: Input */}
               <div className="budget-card__input-wrap">
                 <span className="budget-card__currency">$</span>
                 <input
                   type="number"
                   min="0"
                   step="1"
-                  placeholder={t("budget.placeholder")}
+                  placeholder="0"
                   value={draft[cat]}
                   onChange={(e) => handleChange(cat, e.target.value)}
                   className="budget-card__input"
                 />
               </div>
 
+              {/* Row 3: Spent / Limit meta */}
               <div className="budget-card__meta">
                 <span>
                   {t("budget.spent")}: <strong>${fmt(spent)}</strong>
                 </span>
                 <span>
-                  {limit > 0 ? (
-                    <>
-                      {t("budget.of")} ${fmt(limit)}
-                    </>
+                  {hasLimit ? (
+                    <span className={remaining < 0 ? "budget-card__over-amt" : ""}>
+                      {remaining >= 0
+                        ? `$${fmt(remaining)} left`
+                        : `$${fmt(Math.abs(remaining))} over`}
+                    </span>
                   ) : (
-                    t("budget.noLimit")
+                    <span style={{ color: "#d1d5db" }}>No limit</span>
                   )}
                 </span>
               </div>
 
-              <div className="budget-card__bar">
-                <div
-                  className={`budget-card__fill budget-card__fill--${status}`}
-                  style={{ width: `${pct}%` }}
-                />
+              {/* Row 4: Progress bar + percentage */}
+              <div className="budget-card__bar-wrap">
+                <div className="budget-card__bar">
+                  <div
+                    className={`budget-card__fill budget-card__fill--${status}${status === "over" ? " budget-card__fill--pulse" : ""}`}
+                    style={{ width: hasLimit ? `${pct}%` : "0%" }}
+                  />
+                </div>
+                {hasLimit && (
+                  <span className={`budget-card__pct budget-card__pct--${status}`}>
+                    {pct}%
+                  </span>
+                )}
               </div>
             </div>
           );

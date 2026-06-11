@@ -248,3 +248,26 @@
     display: block;
   }
 }
+
+.sidebar-theme-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: var(--bg-main, #f9fafb);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 9px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary, #374151);
+  font-family: "Inter", sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 8px;
+}
+.sidebar-theme-btn:hover {
+  border-color: var(--green, #22c55e);
+  color: var(--green-dark, #16a34a);
+  background: var(--green-bg, #f0fdf4);
+}

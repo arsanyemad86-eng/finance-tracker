@@ -11,6 +11,9 @@ import {
 import { useTransactions } from "../hooks/useTransactions";
 import { useBudgets, getExceededCategories } from "../hooks/useBudgets";
 import { useLang } from "../contexts/LanguageContext";
+import { useState } from "react";
+import MonthlyReport from "../components/MonthlyReport";
+import EmptyState from "../components/EmptyState";
 import "./Dashboard.css";
 import "./Budget.css";
 
@@ -76,6 +79,18 @@ export default function Dashboard() {
   const topAmt = sortedCats.length ? sortedCats[0][1] : 0;
 
   const exceeded = getExceededCategories(budgets, transactions);
+  const [showReport, setShowReport] = useState(false);
+
+  // ── Theme tracking for chart colors ──
+  const [theme, setTheme] = useState(() => document.documentElement.getAttribute("data-theme") || "light");
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setTheme(document.documentElement.getAttribute("data-theme") || "light");
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => observer.disconnect();
+  }, []);
 
   const localeForDates = lang === "ar" ? "ar-EG" : "en-US";
 
@@ -94,9 +109,20 @@ export default function Dashboard() {
       .reduce((s, t) => s + t.amount, 0) || 0;
   });
 
+  // ── Bar Chart ──
   useEffect(() => {
     if (!barRef.current) return;
     barChart.current?.destroy();
+
+    const barCount = barLabels.length;
+    const isHorizontal = barCount <= 4;
+    const maxVal = Math.max(...barData);
+
+    const isDark = theme === "dark";
+    const tickColor = isDark ? "#94a3b8" : "#9ca3af";
+    const gridColor = isDark ? "#2a2d3e" : "#f3f4f6";
+    const yLabelColor = isDark ? "#94a3b8" : "#111827";
+
     barChart.current = new Chart(barRef.current, {
       type: "bar",
       data: {
@@ -106,10 +132,11 @@ export default function Dashboard() {
           backgroundColor: barLabels.map((_, i) => BAR_COLORS[i % BAR_COLORS.length]),
           borderRadius: 6,
           borderSkipped: false,
-          barThickness: 22,
+          barThickness: isHorizontal ? 28 : 22,
         }],
       },
       options: {
+        indexAxis: isHorizontal ? "y" : "x",
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
@@ -117,27 +144,46 @@ export default function Dashboard() {
           tooltip: { callbacks: { label: (c) => ` $${fmt(c.raw)}` } },
         },
         scales: {
-          x: {
-            grid: { display: false },
-            ticks: { color: "#9ca3af", font: { family: "Inter", size: 11 } },
-            border: { display: false },
-          },
-          y: {
-            grid: { color: "#f3f4f6", drawTicks: false },
+          x: isHorizontal ? {
+            grid: { color: gridColor, drawTicks: false },
+            min: 0,
+            max: Math.ceil(maxVal * 1.15),
             ticks: {
-              color: "#9ca3af",
+              color: tickColor,
               font: { family: "Inter", size: 11 },
               callback: (v) => v >= 1000 ? `$${v / 1000}k` : `$${v}`,
-              maxTicksLimit: 6,
+              maxTicksLimit: 5,
+            },
+            border: { display: false },
+          } : {
+            grid: { display: false },
+            ticks: { color: tickColor, font: { family: "Inter", size: 11 } },
+            border: { display: false },
+          },
+          y: isHorizontal ? {
+            grid: { display: false },
+            ticks: { color: yLabelColor, font: { family: "Inter", size: 12, weight: "600" } },
+            border: { display: false },
+          } : {
+            grid: { color: gridColor, drawTicks: false },
+            min: 0,
+            max: Math.ceil(maxVal * 1.25),
+            ticks: {
+              color: tickColor,
+              font: { family: "Inter", size: 11 },
+              callback: (v) => v >= 1000 ? `$${v / 1000}k` : `$${v}`,
+              maxTicksLimit: 5,
             },
             border: { display: false },
           },
         },
+        layout: { padding: { left: 4, right: 12, top: 4, bottom: 4 } },
       },
     });
     return () => barChart.current?.destroy();
-  }, [transactions]);
+  }, [transactions, theme]);
 
+  // ── Donut Chart ──
   useEffect(() => {
     if (!donutRef.current) return;
     donutChart.current?.destroy();
@@ -172,11 +218,16 @@ export default function Dashboard() {
       },
     });
     return () => donutChart.current?.destroy();
-  }, [transactions, lang]);
+  }, [transactions, lang, theme]);
 
+  // ── Line Chart ──
   useEffect(() => {
     if (!lineRef.current) return;
     lineChart.current?.destroy();
+
+    const isDark = theme === "dark";
+    const tickColor = isDark ? "#94a3b8" : "#9ca3af";
+
     lineChart.current = new Chart(lineRef.current, {
       type: "line",
       data: {
@@ -203,7 +254,7 @@ export default function Dashboard() {
         scales: {
           x: {
             grid: { display: false },
-            ticks: { color: "#9ca3af", font: { family: "Inter", size: 11 } },
+            ticks: { color: tickColor, font: { family: "Inter", size: 11 } },
             border: { display: false },
           },
           y: { display: false },
@@ -211,14 +262,29 @@ export default function Dashboard() {
       },
     });
     return () => lineChart.current?.destroy();
-  }, [transactions, lang]);
+  }, [transactions, lang, theme]);
 
   return (
     <div className="dash">
       <div className="dash-topbar">
         <h1 className="dash-heading">{t("dash.title")}</h1>
-        <span className="dash-period">{t("dash.period")}</span>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <button
+            className="dash-report-btn"
+            onClick={() => setShowReport(true)}
+          >
+            📊 Monthly Report
+          </button>
+          <span className="dash-period">{t("dash.period")}</span>
+        </div>
       </div>
+
+{showReport && (
+  <MonthlyReport
+    transactions={transactions}
+    onClose={() => setShowReport(false)}
+  />
+)}
 
       <div className="dash-cards">
         <div className="dash-card">
@@ -321,7 +387,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Budget Alerts ── */}
       <div className="dash-budget-alerts">
         <div className="dash-budget-alerts__title">{t("dash.budgetAlerts")}</div>
         {exceeded.length === 0 ? (
@@ -347,10 +412,12 @@ export default function Dashboard() {
             <Link to="/transactions" className="dash-panel__link">{t("dash.seeAll")}</Link>
           </div>
           {recent.length === 0 ? (
-            <div className="dash-empty">
-              {t("dash.noTxnYet")}{" "}
-              <Link to="/add" className="dash-empty__link">{t("dash.addOne")}</Link>
-            </div>
+            <EmptyState
+              title="No transactions yet"
+              subtitle="Start tracking your finances"
+              linkTo="/add"
+              linkLabel={t("dash.addOne")}
+            />
           ) : (
             <ul className="dash-txn-list">
               {recent.map((tx) => (

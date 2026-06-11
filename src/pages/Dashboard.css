@@ -181,6 +181,12 @@
   position: relative;
 }
 
+@media (max-width: 640px) {
+  .dash-bar-wrap {
+    height: 160px;
+  }
+}
+
 /* ── Donut panel ── */
 .dash-panel--report {
   display: flex;
@@ -360,7 +366,65 @@
 }
 
 @media (max-width: 640px) {
-  .dash { padding: 16px; gap: 14px; }
-  .dash-cards { grid-template-columns: 1fr 1fr; gap: 12px; }
-  .dash-card__val { font-size: 18px; }
+  .dash { padding: 14px; gap: 12px; }
+
+  /* Stats cards — 2 columns */
+  .dash-cards {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .dash-card {
+    padding: 14px 14px 12px;
+  }
+
+  .dash-card__val {
+    font-size: 16px;
+  }
+
+  .dash-card__label {
+    font-size: 9px;
+  }
+
+  .dash-card__trend {
+    font-size: 10px;
+  }
+
+  .dash-card__icon {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 6px;
+  }
+
+  /* Charts — single column */
+  .dash-charts {
+    grid-template-columns: 1fr;
+  }
+
+  /* Bar chart height */
+  .dash-bar-wrap {
+    height: 140px;
+  }
+
+  /* Donut bigger on mobile */
+  .dash-donut-wrap {
+    height: 150px;
+  }
+
+  /* Bottom panels — single column */
+  .dash-bottom {
+    grid-template-columns: 1fr;
+  }
+
+  /* Transaction list */
+  .dash-txn__cat { font-size: 13px; }
+  .dash-txn__date { font-size: 11px; }
+  .dash-txn__amt { font-size: 13px; }
+
+  /* Topbar */
+  .dash-heading { font-size: 17px; }
+  .dash-period { font-size: 11px; padding: 4px 10px; }
+
+  /* Panel titles */
+  .dash-panel__title { font-size: 12px; }
 }

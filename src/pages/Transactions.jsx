@@ -4,6 +4,7 @@ import { useTransactions } from "../hooks/useTransactions";
 import { useBudgets, getExceededCategories } from "../hooks/useBudgets";
 import { useLang } from "../contexts/LanguageContext";
 import { getAIMessage } from "../lib/ai";
+import EmptyState from "../components/EmptyState";
 import "./Transactions.css";
 
 const EXPENSE_CATS = ["Food", "House Rent", "Transport", "Bills", "Shopping", "Health", "Education", "Entertainment", "Other"];
@@ -30,6 +31,10 @@ export default function Transactions() {
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo,   setDateTo]   = useState("");
+
+  // ── JSON backup / restore ──
+  const importInputRef = useRef(null);
+  const [importToast, setImportToast] = useState("");
 
   const clearDateRange = () => {
     setDateFrom("");
@@ -189,6 +194,60 @@ export default function Transactions() {
     URL.revokeObjectURL(url);
   };
 
+  // ── JSON Export ──
+  const handleExportJson = () => {
+    const budgetsRaw = localStorage.getItem("fintrack_budgets");
+    const budgets = budgetsRaw ? JSON.parse(budgetsRaw) : {};
+
+    const data = {
+      version: "1.0",
+      exportedAt: new Date().toISOString(),
+      transactions,
+      budgets,
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `fintrack-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // ── JSON Import ──
+  const handleImportClick = () => {
+    importInputRef.current?.click();
+  };
+
+  const handleImportFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (!Array.isArray(data.transactions)) {
+          throw new Error("Invalid backup file");
+        }
+        const confirmed = window.confirm("This will replace all your current data. Continue?");
+        if (!confirmed) return;
+
+        localStorage.setItem("fintrack_transactions", JSON.stringify(data.transactions));
+        localStorage.setItem("fintrack_budgets", JSON.stringify(data.budgets || {}));
+        window.location.reload();
+      } catch {
+        setImportToast("Invalid backup file. Please select a valid FinTrack JSON export.");
+        setTimeout(() => setImportToast(""), 4000);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
   // ── Filter + search + sort ──
   const exceeded = getExceededCategories(budgets, transactions);
 
@@ -225,6 +284,11 @@ export default function Transactions() {
 
   return (
     <div className="txn-page">
+
+      {/* ── Import error toast ── */}
+      {importToast && (
+        <div className="txn-toast txn-toast--error">{importToast}</div>
+      )}
 
       {/* ── Edit Modal ── */}
       {editingTxn && (
@@ -363,6 +427,29 @@ export default function Transactions() {
             </svg>
             {t("txn.exportCsv")}
           </button>
+          <button type="button" className="txn-export-btn" onClick={handleExportJson}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export JSON
+          </button>
+          <button type="button" className="txn-export-btn" onClick={handleImportClick}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Import JSON
+          </button>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept=".json"
+            onChange={handleImportFile}
+            style={{ display: "none" }}
+          />
           <Link to="/add" className="txn-add-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -438,16 +525,16 @@ export default function Transactions() {
       {/* ── Table ── */}
       <div className="txn-table-wrap">
         {sorted.length === 0 ? (
-          <div className="txn-empty">
-            {(q || dateFrom || dateTo)
-              ? t("txn.noMatch")
-              : (
-                <>
-                  {t("txn.empty")}{" "}
-                  <Link to="/add" className="txn-empty__link">{t("txn.addOne")}</Link>
-                </>
-              )}
-          </div>
+          (q || dateFrom || dateTo) ? (
+            <div className="txn-empty">{t("txn.noMatch")}</div>
+          ) : (
+            <EmptyState
+              title="No transactions yet"
+              subtitle="Start tracking your finances"
+              linkTo="/add"
+              linkLabel={t("txn.addOne")}
+            />
+          )
         ) : (
           <table className="txn-table">
             <thead>
@@ -471,7 +558,7 @@ export default function Transactions() {
                       {t(`txn.${txn.type}`)}
                     </span>
                   </td>
-                  <td className={`txn-amount txn-amount--${txn.type}`} style={{ textAlign: "right" }}>
+                  <td className={`txn-amount txn-amount--${txn.type}`}>
                     {txn.type === "income" ? "+" : "-"}${fmt(txn.amount)}
                   </td>
                   <td className="txn-actions-cell">

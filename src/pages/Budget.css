@@ -263,3 +263,44 @@
   background: #dcfce7;
   border-color: #4ade80;
 }
+
+/* ── Progress bar wrap (new) ── */
+.budget-card__bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.budget-card__bar {
+  flex: 1;
+  height: 7px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.budget-card__pct {
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 32px;
+  text-align: right;
+  color: #9ca3af;
+}
+.budget-card__pct--safe    { color: #16a34a; }
+.budget-card__pct--warning { color: #d97706; }
+.budget-card__pct--over    { color: #dc2626; }
+
+/* ── Over amount text ── */
+.budget-card__over-amt {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+/* ── Pulse animation for over-budget fill ── */
+@keyframes bar-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+.budget-card__fill--pulse {
+  animation: bar-pulse 1.4s ease-in-out infinite;
+}

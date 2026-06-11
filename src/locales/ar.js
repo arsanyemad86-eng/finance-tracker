@@ -7,6 +7,8 @@ export default {
   "nav.transactions": "المعاملات",
   "nav.add": "إضافة جديدة",
   "nav.budget": "الميزانية",
+  "nav.goals": "الأهداف",
+  "nav.recurring": "المتكررة",
   "nav.langToggle": "English",
 
   // Dashboard

@@ -7,6 +7,8 @@ export default {
   "nav.transactions": "Transactions",
   "nav.add": "Add New",
   "nav.budget": "Budget",
+  "nav.goals": "Goals",
+  "nav.recurring": "Recurring",
   "nav.langToggle": "العربية",
 
   // Dashboard

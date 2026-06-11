@@ -9,6 +9,21 @@ const MAX_TOKENS = 1000;
 
 function buildPrompt({ type, amount, category, note, lang }) {
   const langName = lang === "ar" ? "Arabic" : "English";
+
+  // Monthly summary prompt
+  if (type === "summary") {
+    return `You are a friendly personal finance assistant.
+Here is the user's monthly financial summary:
+${note}
+
+Language: ${langName}
+
+Write a short, actionable insight (2-3 sentences max) about their spending habits this month.
+Be specific, practical, and encouraging. Mention the top spending category if relevant.
+No generic advice — base it on the actual numbers provided.`;
+  }
+
+  // Transaction prompt
   return `You are a friendly personal finance assistant.
 The user just recorded a transaction:
 - Type: ${type}
