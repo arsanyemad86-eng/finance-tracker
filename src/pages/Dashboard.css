@@ -428,3 +428,30 @@
   /* Panel titles */
   .dash-panel__title { font-size: 12px; }
 }
+
+/* ── Monthly Report Button ── */
+.dash-report-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #22c55e;
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: "Inter", sans-serif;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.dash-report-btn:hover {
+  background: #16a34a;
+}
+[data-theme="dark"] .dash-report-btn {
+  background: #16a34a;
+}
+[data-theme="dark"] .dash-report-btn:hover {
+  background: #15803d;
+}
