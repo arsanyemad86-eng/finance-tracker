@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
+import Home from './pages/Home'
 import Dashboard from './pages/Dashboard'
 import Transactions from './pages/Transactions'
 import AddTransaction from './pages/AddTransaction'
@@ -33,13 +34,23 @@ function App() {
   const { addTransaction } = useTransactions();
   useRecurring(addTransaction);
   const dir = lang === 'ar' ? 'rtl' : 'ltr';
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+
+  if (isHome) {
+    return (
+      <Routes>
+        <Route path="/" element={<Home />} />
+      </Routes>
+    );
+  }
 
   return (
     <div className={`app-layout app-layout--${dir}`} dir={dir}>
       <Sidebar theme={theme} toggleTheme={toggleTheme} />
       <main className="main-content">
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/add" element={<AddTransaction />} />
           <Route path="/budget" element={<Budget />} />
